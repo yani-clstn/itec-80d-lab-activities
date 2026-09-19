@@ -4,163 +4,156 @@ import math
 # Initialize the main application window
 root = tk.Tk()
 root.title("BMI Calculator - Modern HCI")
-root.geometry("460x860")
-root.config(bg="#f4f6f9")  # Clean, modern light background
+root.geometry("440x780")
+root.config(bg="#f8f9fa")
 
 # --- State Variables ---
-current_system = tk.StringVar(value="Metric")  # "Metric" or "Imperial"
-age_group_var = tk.StringVar(value="Adult")      # "Adult" or "Child"
+current_system = tk.StringVar(value="Standard")  # "Standard" or "Metric"
+age_group_var = tk.StringVar(value="Adult")
 
-# --- Top Header Section ---
-header_frame = tk.Frame(root, bg="#f4f6f9")
-header_frame.pack(fill="x", padx=25, pady=(15, 10))
+# --- Main Container Frame ---
+main_frame = tk.Frame(root, bg="#f8f9fa")
+main_frame.pack(fill="both", expand=True, padx=25, pady=20)
 
-title_label = tk.Label(header_frame, text="BMI Calculator", font=("Segoe UI", 18, "bold"), bg="#f4f6f9", fg="#1a202c")
-title_label.pack(anchor="w")
+# Title Section
+title_label = tk.Label(main_frame, text="Body Mass Index Calculator", font=("Segoe UI", 16, "bold"), bg="#f8f9fa", fg="#1a365d")
+title_label.pack(pady=(0, 15))
 
-subtitle_label = tk.Label(header_frame, text="Check your Body Mass Index and what it means.", font=("Segoe UI", 10), bg="#f4f6f9", fg="#4a5568")
-subtitle_label.pack(anchor="w", pady=(2, 0))
+# --- Unit Toggle Buttons (Standard / Metric) ---
+toggle_frame = tk.Frame(main_frame, bg="#f8f9fa")
+toggle_frame.pack(pady=(0, 15))
 
-
-# --- Main Input Card Container ---
-card_frame = tk.Frame(root, bg="#ffffff", highlightbackground="#cbd5e0", highlightthickness=1)
-card_frame.pack(fill="x", padx=25, pady=5, ipadx=10, ipady=10)
-
-# 1. Measurement Units Selection (Radio Buttons)
-units_label = tk.Label(card_frame, text="Measurement Units", font=("Segoe UI", 10, "bold"), bg="#ffffff", fg="#2d3748")
-units_label.pack(anchor="w", padx=15, pady=(10, 5))
-
-radio_frame = tk.Frame(card_frame, bg="#ffffff")
-radio_frame.pack(anchor="w", padx=15, pady=2)
-
-def switch_system():
-    system = current_system.get()
-    if system == "Metric":
-        metric_height_frame.pack(fill="x")
-        imperial_height_frame.pack_forget()
-        height_title_label.config(text="Height (cm):")
-        weight_title_label.config(text="Weight (kg):")
-    else:
+def switch_units(system):
+    current_system.set(system)
+    if system == "Standard":
+        std_btn.config(bg="#1d4ed8", fg="#ffffff", relief="flat")
+        met_btn.config(bg="#ffffff", fg="#1a202c", relief="solid", bd=1)
+        height_sub_label.config(text="Feet & Inches")
+        weight_sub_label.config(text="Pounds (lbs)")
         metric_height_frame.pack_forget()
-        imperial_height_frame.pack(fill="x")
-        height_title_label.config(text="Height (ft / in):")
-        weight_title_label.config(text="Weight (lbs):")
+        standard_height_frame.pack(fill="x")
+    else:
+        met_btn.config(bg="#1d4ed8", fg="#ffffff", relief="flat")
+        std_btn.config(bg="#ffffff", fg="#1a202c", relief="solid", bd=1)
+        height_sub_label.config(text="Centimeters (cm)")
+        weight_sub_label.config(text="Kilograms (kg)")
+        standard_height_frame.pack_forget()
+        metric_height_frame.pack(fill="x")
     calculate_bmi()
 
-metric_rb = tk.Radiobutton(radio_frame, text="Metric (cm / kg)", variable=current_system, value="Metric", 
-                           font=("Segoe UI", 10), bg="#ffffff", activebackground="#ffffff", command=switch_system)
-metric_rb.pack(side="left", padx=(0, 15))
+std_btn = tk.Button(toggle_frame, text="Standard", font=("Segoe UI", 10, "bold"), width=10, pady=6, command=lambda: switch_units("Standard"))
+std_btn.pack(side="left")
 
-imperial_rb = tk.Radiobutton(radio_frame, text="Imperial (in / lb)", variable=current_system, value="Imperial", 
-                             font=("Segoe UI", 10), bg="#ffffff", activebackground="#ffffff", command=switch_system)
-imperial_rb.pack(side="left")
+met_btn = tk.Button(toggle_frame, text="Metric", font=("Segoe UI", 10, "bold"), width=10, pady=6, command=lambda: switch_units("Metric"))
+met_btn.pack(side="left", padx=5)
 
+# --- Target Group Section ---
+target_container = tk.Frame(main_frame, bg="#f8f9fa")
+target_container.pack(fill="x", pady=(0, 10))
 
-# 2. Target Group Selection
-target_label = tk.Label(card_frame, text="Target Group:", font=("Segoe UI", 10, "bold"), bg="#ffffff", fg="#2d3748")
-target_label.pack(anchor="w", padx=15, pady=(12, 2))
+target_label = tk.Label(target_container, text="Target Group:", font=("Segoe UI", 10, "bold"), bg="#f8f9fa", fg="#2d3748")
+target_label.pack(side="left", padx=(0, 10))
 
-target_frame = tk.Frame(card_frame, bg="#ffffff")
-target_frame.pack(fill="x", padx=15, pady=2)
-target_menu = tk.OptionMenu(target_frame, age_group_var, "Adult", "Child (2-19 yrs)", command=lambda _: calculate_bmi())
-target_menu.config(font=("Segoe UI", 10), bg="#e2e8f0", relief="flat", highlightthickness=0, anchor="w")
-target_menu.pack(fill="x", ipady=2)
+target_menu = tk.OptionMenu(target_container, age_group_var, "Adult", "Child (2-19 yrs)", command=lambda _: calculate_bmi())
+target_menu.config(font=("Segoe UI", 10), bg="#e2e8f0", relief="flat", highlightthickness=0, width=12)
+target_menu.pack(side="left")
 
+# --- Height Section ---
+height_label = tk.Label(main_frame, text="Height", font=("Segoe UI", 11, "bold"), bg="#f8f9fa", fg="#1a202c")
+height_label.pack(anchor="w", pady=(5, 0))
 
-# 3. Height Section (Strictly above weight)
-height_title_label = tk.Label(card_frame, text="Height (cm):", font=("Segoe UI", 10, "bold"), bg="#ffffff", fg="#2d3748")
-height_title_label.pack(anchor="w", padx=15, pady=(12, 2))
+height_sub_label = tk.Label(main_frame, text="Feet & Inches", font=("Segoe UI", 8, "italic"), bg="#f8f9fa", fg="#718096")
+height_sub_label.pack(anchor="w", pady=(0, 2))
 
-# Dedicated Height Wrapper Frame
-height_wrapper = tk.Frame(card_frame, bg="#ffffff")
-height_wrapper.pack(fill="x", padx=15, pady=2)
+# Dedicated Height Container Wrapper (Guarantees height inputs stay strictly above weight)
+height_wrapper = tk.Frame(main_frame, bg="#f8f9fa")
+height_wrapper.pack(fill="x", pady=(2, 5))
 
-# Metric Height Input Frame
-metric_height_frame = tk.Frame(height_wrapper, bg="#ffffff")
-metric_height_frame.pack(fill="x")
-cm_entry = tk.Entry(metric_height_frame, font=("Segoe UI", 11), relief="solid", bd=1, highlightthickness=0)
+# Standard Height Frame (Feet & Inches)
+standard_height_frame = tk.Frame(height_wrapper, bg="#f8f9fa")
+ft_entry = tk.Entry(standard_height_frame, font=("Segoe UI", 11), relief="solid", bd=1, width=10)
+ft_entry.pack(side="left", fill="x", expand=True, ipady=4)
+tk.Label(standard_height_frame, text="ft", font=("Segoe UI", 10), bg="#f8f9fa").pack(side="left", padx=6)
+
+in_entry = tk.Entry(standard_height_frame, font=("Segoe UI", 11), relief="solid", bd=1, width=10)
+in_entry.pack(side="left", fill="x", expand=True, ipady=4, padx=(5, 0))
+tk.Label(standard_height_frame, text="in", font=("Segoe UI", 10), bg="#f8f9fa").pack(side="left", padx=6)
+
+# Metric Height Frame (Centimeters)
+metric_height_frame = tk.Frame(height_wrapper, bg="#f8f9fa")
+cm_entry = tk.Entry(metric_height_frame, font=("Segoe UI", 11), relief="solid", bd=1)
 cm_entry.pack(fill="x", ipady=4)
 
-# Imperial Height Input Frame (Feet & Inches) - Hidden by default
-imperial_height_frame = tk.Frame(height_wrapper, bg="#ffffff")
-ft_entry = tk.Entry(imperial_height_frame, font=("Segoe UI", 11), relief="solid", bd=1, width=8)
-ft_entry.pack(side="left", fill="x", expand=True, ipady=4)
-tk.Label(imperial_height_frame, text="ft", font=("Segoe UI", 10), bg="#ffffff").pack(side="left", padx=5)
-in_entry = tk.Entry(imperial_height_frame, font=("Segoe UI", 11), relief="solid", bd=1, width=8)
-in_entry.pack(side="left", fill="x", expand=True, ipady=4, padx=(5, 0))
-tk.Label(imperial_height_frame, text="in", font=("Segoe UI", 10), bg="#ffffff").pack(side="left", padx=5)
+# --- Weight Section (Strictly below height wrapper) ---
+weight_title_label = tk.Label(main_frame, text="Weight", font=("Segoe UI", 11, "bold"), bg="#f8f9fa", fg="#1a202c")
+weight_title_label.pack(anchor="w", pady=(10, 0))
 
+weight_sub_label = tk.Label(main_frame, text="Pounds (lbs)", font=("Segoe UI", 8, "italic"), bg="#f8f9fa", fg="#718096")
+weight_sub_label.pack(anchor="w", pady=(0, 2))
 
-# 4. Weight Section (Strictly below height inputs)
-weight_title_label = tk.Label(card_frame, text="Weight (kg):", font=("Segoe UI", 10, "bold"), bg="#ffffff", fg="#2d3748")
-weight_title_label.pack(anchor="w", padx=15, pady=(12, 2))
+weight_entry = tk.Entry(main_frame, font=("Segoe UI", 11), relief="solid", bd=1)
+weight_entry.pack(fill="x", pady=(2, 15), ipady=4)
 
-weight_frame = tk.Frame(card_frame, bg="#ffffff")
-weight_frame.pack(fill="x", padx=15, pady=(2, 10))
-weight_entry = tk.Entry(weight_frame, font=("Segoe UI", 11), relief="solid", bd=1)
-weight_entry.pack(fill="x", ipady=4)
+# --- Gauge & Result Canvas ---
+canvas_frame = tk.Frame(main_frame, bg="#f8f9fa")
+canvas_frame.pack(pady=5)
 
-
-# --- Bottom Visual Gauge & Result Card ---
-result_card = tk.Frame(root, bg="#ffffff", highlightbackground="#cbd5e0", highlightthickness=1)
-result_card.pack(fill="x", padx=25, pady=5, ipadx=10, ipady=10)
-
-canvas_frame = tk.Frame(result_card, bg="#ffffff")
-canvas_frame.pack(pady=2)
-
-gauge_canvas = tk.Canvas(canvas_frame, width=240, height=110, bg="#ffffff", highlightthickness=0)
+gauge_canvas = tk.Canvas(canvas_frame, width=220, height=105, bg="#f8f9fa", highlightthickness=0)
 gauge_canvas.pack()
 
 def draw_gauge(bmi_val=0):
-    """Draws an accurate interactive gauge arc matching needle angles to BMI ranges."""
     gauge_canvas.delete("all")
-    colors = ["#3182ce", "#38a169", "#d69e2e", "#e53e3e"]  # Blue (Under), Green (Normal), Yellow (Over), Red (Obese)
+    # Colors from left to right: Blue (Underweight), Green (Normal), Yellow (Overweight), Red (Obese)
+    colors = ["#3182ce", "#38a169", "#d69e2e", "#e53e3e"]
     extent_angle = 180 / len(colors)
     
     for i, color in enumerate(colors):
-        gauge_canvas.create_arc(15, 15, 225, 225, start=i * extent_angle, extent=extent_angle, fill=color, outline="white", width=2)
+        start_deg = 180 - ((i + 1) * extent_angle)
+        gauge_canvas.create_arc(10, 10, 210, 210, start=start_deg, extent=extent_angle, fill=color, outline="white", width=2)
         
-    gauge_canvas.create_oval(60, 60, 180, 180, fill="#ffffff", outline="#ffffff")
+    gauge_canvas.create_oval(55, 55, 165, 165, fill="#f8f9fa", outline="#f8f9fa")
     
     if bmi_val > 0:
         capped_bmi = max(10, min(45, bmi_val))
-        # Corrected angle calculation mapping low BMI to right (0°) and high BMI to left (180°)
-        angle = ((capped_bmi - 10) / 35) * 180
+        angle = 180 - ((capped_bmi - 10) / 35) * 180
         rad = math.radians(angle)
-        cx, cy, length = 120, 120, 55
+        cx, cy, length = 110, 110, 50
         nx = cx + length * math.cos(rad)
         ny = cy - length * math.sin(rad)
-        gauge_canvas.create_line(cx, cy, nx, ny, fill="#1a202c", width=3, arrow=tk.LAST)
-        gauge_canvas.create_oval(cx-4, cy-4, cx+4, cy+4, fill="#1a202c")
+        gauge_canvas.create_line(cx, cy, nx, ny, fill="#1a202c", width=2.5, arrow=tk.LAST)
+        gauge_canvas.create_oval(cx-3, cy-3, cx+3, cy+3, fill="#1a202c")
 
 draw_gauge(0)
 
-bmi_value_label = tk.Label(result_card, text="Enter values above", font=("Segoe UI", 14, "bold"), bg="#ffffff", fg="#4a5568")
-bmi_value_label.pack(pady=(2, 0))
+# Single-line feedback label
+feedback_label = tk.Label(main_frame, text="Enter values above", font=("Segoe UI", 11, "bold"), bg="#f8f9fa", fg="#4a5568")
+feedback_label.pack(pady=8)
 
-bmi_category_label = tk.Label(result_card, text="", font=("Segoe UI", 11, "bold"), bg="#ffffff", fg="#38a169")
-bmi_category_label.pack(pady=(0, 5))
-
-
-# --- Action Buttons Container ---
-btn_frame = tk.Frame(root, bg="#f4f6f9")
-btn_frame.pack(fill="x", padx=25, pady=8)
-
+# --- Reset Button ---
 clear_btn = tk.Button(
-    btn_frame, text="Reset Form", font=("Segoe UI", 10), 
-    bg="#ffffff", fg="#2d3748", activebackground="#edf2f7", activeforeground="#1a202c",
-    relief="solid", bd=1, cursor="hand2", padx=20, pady=6, command=lambda: clear_all()
+    main_frame, text="Reset Form", font=("Segoe UI", 9), 
+    bg="#e9ecef", fg="#495057", activebackground="#ced4da", activeforeground="#1a202c",
+    relief="flat", cursor="hand2", width=14, pady=5, command=lambda: clear_all()
 )
-clear_btn.pack(fill="x", expand=True)
+clear_btn.pack(pady=5)
 
 
-# --- Core Logic & Real-Time Calculation ---
+# --- Calculation Logic ---
 def calculate_bmi(event=None):
     try:
         system = current_system.get()
-        
-        # Height parsing
-        if system == "Metric":
+        if system == "Standard":
+            ft_str = ft_entry.get().strip()
+            in_str = in_entry.get().strip()
+            if not ft_str and not in_str:
+                reset_result()
+                return
+            total_inches = (float(ft_str or 0) * 12) + float(in_str or 0)
+            if total_inches <= 0:
+                reset_result()
+                return
+            height_m = total_inches * 0.0254
+        else:
             cm_str = cm_entry.get().strip()
             if not cm_str:
                 reset_result()
@@ -170,21 +163,7 @@ def calculate_bmi(event=None):
                 reset_result()
                 return
             height_m = cm_val / 100
-        else:
-            ft_str = ft_entry.get().strip()
-            in_str = in_entry.get().strip()
-            if not ft_str and not in_str:
-                reset_result()
-                return
-            ft_val = float(ft_str or 0)
-            in_val = float(in_str or 0)
-            total_inches = (ft_val * 12) + in_val
-            if total_inches <= 0:
-                reset_result()
-                return
-            height_m = total_inches * 0.0254
 
-        # Weight parsing
         weight_str = weight_entry.get().strip()
         if not weight_str:
             reset_result()
@@ -193,17 +172,10 @@ def calculate_bmi(event=None):
         if weight_val <= 0:
             reset_result()
             return
-            
-        if system == "Metric":
-            weight_kg = weight_val
-        else:
-            weight_kg = weight_val * 0.45359237
 
-        # BMI Calculation
+        weight_kg = weight_val if system == "Metric" else weight_val * 0.45359237
         bmi = weight_kg / (height_m ** 2)
 
-        # Categorization
-        is_child = "Child" in age_group_var.get()
         if bmi < 18.5:
             category, color = "Underweight", "#3182ce"
         elif 18.5 <= bmi < 25:
@@ -213,32 +185,33 @@ def calculate_bmi(event=None):
         else:
             category, color = "Obese", "#e53e3e"
 
-        if is_child:
+        if "Child" in age_group_var.get():
             category += " (Child Est.)"
 
-        bmi_value_label.config(text=f"BMI: {bmi:.2f}", fg="#1a202c")
-        bmi_category_label.config(text=category, fg=color)
+        feedback_label.config(text=f"BMI: {bmi:.2f} — {category}", fg=color)
         draw_gauge(bmi)
 
     except ValueError:
         reset_result()
 
 def reset_result():
-    bmi_value_label.config(text="Enter values above", fg="#4a5568")
-    bmi_category_label.config(text="")
+    feedback_label.config(text="Enter values above", fg="#4a5568")
     draw_gauge(0)
 
 def clear_all():
-    cm_entry.delete(0, tk.END)
     ft_entry.delete(0, tk.END)
     in_entry.delete(0, tk.END)
+    cm_entry.delete(0, tk.END)
     weight_entry.delete(0, tk.END)
     reset_result()
 
-# --- Key Bindings for Real-Time Reactivity ---
-cm_entry.bind("<KeyRelease>", calculate_bmi)
+# Bindings
 ft_entry.bind("<KeyRelease>", calculate_bmi)
 in_entry.bind("<KeyRelease>", calculate_bmi)
+cm_entry.bind("<KeyRelease>", calculate_bmi)
 weight_entry.bind("<KeyRelease>", calculate_bmi)
+
+# Set initial active button appearance
+switch_units("Standard")
 
 root.mainloop()
