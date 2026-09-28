@@ -15,12 +15,18 @@ def score_round(correct_pattern, selected_cells):
     Compares what the user selected against the correct pattern.
     Returns a dict with correct_cells, incorrect_cells, missed_cells,
     total_errors, and accuracy (0-100).
+
+    Accuracy = correct / (pattern size + wrongly selected tiles).
+    Wrong picks add to the denominator, so selecting every tile on the grid
+    can no longer score 100%. Only a perfect answer reaches 100%.
     """
     correct_cells = len(correct_pattern & selected_cells)
     incorrect_cells = len(selected_cells - correct_pattern)
     missed_cells = len(correct_pattern - selected_cells)
     total_errors = incorrect_cells + missed_cells
-    accuracy = (correct_cells / len(correct_pattern)) * 100 if correct_pattern else 0
+
+    denominator = len(correct_pattern) + incorrect_cells
+    accuracy = (correct_cells / denominator) * 100 if denominator else 0
 
     return {
         "correct_cells": correct_cells,
