@@ -1,6 +1,6 @@
-# Configuration constants for the Visual Pattern Memory Game
-# Keeping these in one place makes it easy to tune difficulty and restyle
-# the interface without touching any of the game or GUI logic.
+# Configuration constants for the Visual Pattern Memory Game.
+# Keeping these in one place makes it easy to tune difficulty, add themes,
+# or restyle the interface without touching any game or GUI logic.
 
 # ---------------------------------------------------------------
 # Difficulty: one dict per round (5 progressively harder rounds)
@@ -14,35 +14,56 @@ ROUNDS = [
 ]
 
 FEEDBACK_PAUSE_MS = 2200   # how long per-round feedback stays on screen
-
-# Tile size in pixels for each grid size (bigger grid -> smaller tiles so the
-# game area stays the same size and nothing jumps around between rounds)
-TILE_SIZES = {3: 62, 4: 52, 5: 42}
+TILE_SIZES = {3: 62, 4: 52, 5: 42}   # pixel size of a grid tile, by grid size
 
 # ---------------------------------------------------------------
-# Theme: dark palette with high-contrast text
+# Fonts and text scaling ("resizable text" via A-/A+ buttons)
 # ---------------------------------------------------------------
 FONT = "Arial"
+FONT_SCALES = [0.85, 1.0, 1.15, 1.3, 1.5]   # cycled through by the A-/A+ buttons
 
-BG = "#141626"            # window background
-CARD = "#1e2136"          # panels
-CARD_ALT = "#2a2e4a"      # inputs, secondary buttons, empty progress track
-BORDER = "#3a4066"
-TEXT = "#eef0fb"
-TEXT_MUTED = "#9ba1c7"
-TEXT_ON_LIGHT = "#10121f"  # dark text used on bright tiles/badges
+# ---------------------------------------------------------------
+# Colors that stay the same in both themes (bright, work on light or dark)
+# ---------------------------------------------------------------
+_SHARED_COLORS = dict(
+    ACCENT="#6c63ff",
+    ACCENT_HOVER="#8a83ff",
+    CELL_SHOWN="#4cc9f0",
+    TEXT_ON_LIGHT="#10121f",     # dark text used on bright tiles/badges
+    COLOR_CORRECT="#2fbf71",
+    COLOR_INCORRECT="#ef4a5f",
+    COLOR_MISSED="#f4a621",
+)
 
-ACCENT = "#7c83ff"         # primary buttons, RECALL badge
-ACCENT_HOVER = "#969cff"
-
-CELL_DEFAULT = "#2f3556"
-CELL_HOVER = "#414970"
-CELL_SHOWN = "#4cc9f0"     # a lit tile: pattern being memorized AND a tile
-                           # the user picked (same look = consistency)
-
-COLOR_CORRECT = "#3ddc84"
-COLOR_INCORRECT = "#ff5c72"
-COLOR_MISSED = "#ffb347"
+# ---------------------------------------------------------------
+# Theme palettes: everything a widget needs is in one dict, so any
+# function can just do theme["KEY"] without knowing which theme is active
+# ---------------------------------------------------------------
+THEMES = {
+    "dark": {
+        **_SHARED_COLORS,
+        "BG": "#141626",
+        "CARD": "#1e2136",
+        "CARD_ALT": "#2a2e4a",
+        "BORDER": "#3a4066",
+        "TEXT": "#eef0fb",
+        "TEXT_MUTED": "#9ba1c7",
+        "CELL_DEFAULT": "#2f3556",
+        "CELL_HOVER": "#414970",
+    },
+    "light": {
+        **_SHARED_COLORS,
+        "BG": "#f3f4fb",
+        "CARD": "#ffffff",
+        "CARD_ALT": "#eef0fa",
+        "BORDER": "#d7dbee",
+        "TEXT": "#181a2b",
+        "TEXT_MUTED": "#5c6088",
+        "CELL_DEFAULT": "#e3e6f6",
+        "CELL_HOVER": "#ccd2ef",
+    },
+}
+DEFAULT_THEME = "dark"
 
 # ---------------------------------------------------------------
 # Participant form options
